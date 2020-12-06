@@ -122,7 +122,6 @@ def format_sort_records(people: Tuple[str]) -> str:
     template = "{1:10} {0:10} {2:5.2f}"
     output = []
     for person in sorted(people, key=itemgetter(1, 0)):
-        print(person)
         output.append(template.format(*person))
     return output
 
