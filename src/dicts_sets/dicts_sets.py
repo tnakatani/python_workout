@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict, OrderedDict
 from datetime import datetime, timedelta
 import os
-from typing import Dict, Set, List
+from typing import Dict, Set, List, Union, Callable, Tuple
 from functools import reduce
 
 MENU = {'sandwich': 9.99,
@@ -160,11 +160,6 @@ def tokenize(text: List[str]) -> List[str]:
     return tokenized
 
 
-def count_characters(token: str) -> int:
-    """Counts how many characters there in a token"""
-    len(token)
-
-
 def word_length_freq_table(file_path: str) -> Dict[int, int]:
     """Read through a text file on disk. Use a dict to track how many words
     of each length are in the file--that is, how many three-letter words,
@@ -177,3 +172,76 @@ def word_length_freq_table(file_path: str) -> Dict[int, int]:
             chars = len(token)
             word_length[chars] = word_length.get(chars, 0) + 1
         return word_length
+
+
+################################################################################
+# Dict Diff
+
+def dictdiff(first: Dict[any, any], second: Dict[any, any]) -> Dict[
+    any, Union[any, List[any]]]:
+    """Takes two dicts as arguments. The function returns a new dict that
+    expresses the difference between the two dicts.
+    - If there are no differences between the dicts, returns an empty
+    dict.
+    - For each key-value pair that differs, returns a key-value pair in which
+    the value is a list containing the values from the two different dicts.
+    - If one of the dicts doesn’t contain that key, it should contain None
+    """
+    output = {}
+    all_keys = first.keys() | second.keys()
+    for key in all_keys:
+        f, s = first.get(key), second.get(key)
+        if f != s:
+            output[key] = [f, s]
+    return output
+
+
+################################################################################
+# Dict Merge
+
+
+def dictmerge(*args) -> Dict[any, any]:
+    """Takes any number of dicts and returns a dict that reflects the
+    combination of all of them. If the same key appears in more than one
+    dict, then the most recently merged dict’s value appears in the output."""
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
+
+
+################################################################################
+# Dict Partition
+
+
+def is_even(v: int) -> bool:
+    return v % 2 == 0
+
+
+def dictpartition(d: Dict[any, any], f: Callable) -> Tuple[
+    Dict[any, any], Dict[any, any]]:
+    """Return two dicts, each containing key-value pairs from d. The decision
+    regarding where to put each of the key-value pairs will be made according
+    to the output from f, which will be run on each key-value pair in d. If f
+    returns True, then the key-value pair will be put in the first output
+    dict. If f returns False, then the key-value pair will be put in the
+    second output dict."""
+    output_1, output_2 = {}, {}
+    for key in d:
+        v = d.get(key)
+        if f(v):
+            output_1[key] = v
+            continue
+        output_2[key] = v
+    return output_1, output_2
+
+
+################################################################################
+# Different Numbers
+
+def get_unique_integers(numbers: List[int]) -> int:
+    """Takes a single list of integers and returns the number of different
+    integers it contains"""
+    return len(set(numbers))
+
+

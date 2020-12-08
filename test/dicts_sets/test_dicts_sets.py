@@ -172,3 +172,91 @@ def test_word_length_freq_table():
     with mock.patch("builtins.open", mock_open) as m:
         result = word_length_freq_table('file_path')
     assert result == {1: 1, 2: 1, 3: 1, 4: 1}
+
+
+################################################################################
+# Dict Diff
+
+"""
+Note to self: pytest fixtures need to passed to a test function
+in order to get the return value.
+"""
+
+
+@pytest.fixture
+def simple_dict1():
+    return {'a': 1, 'b': 2, 'c': 3}
+
+
+@pytest.fixture
+def simple_dict2():
+    return {'a': 1, 'b': 2, 'c': 4}
+
+
+@pytest.fixture
+def simple_dict3():
+    return {'a': 1, 'b': 2, 'd': 3}
+
+
+def test_empty():
+    assert dictdiff({}, {}) == {}
+
+
+def test_same(simple_dict1):
+    assert dictdiff(simple_dict1, simple_dict1) == {}
+
+
+def test_simple_diff1(simple_dict1, simple_dict2):
+    assert dictdiff(simple_dict1, simple_dict2) == {'c': [3, 4]}
+
+
+def test_simple_diff2(simple_dict1, simple_dict3):
+    assert dictdiff(simple_dict1, simple_dict3) == {
+        'c': [3, None], 'd': [None, 3]}
+
+
+def test_simple_diff_bw(simple_dict1, simple_dict3):
+    assert dictdiff(simple_dict3, simple_dict1) == {
+        'c': [None, 3], 'd': [3, None]}
+
+
+################################################################################
+# Dict Merge
+
+
+def test_empty():
+    assert dictmerge() == {}
+
+
+def test_multi_dicts(simple_dict1, simple_dict2, simple_dict3):
+    assert dictmerge(simple_dict1, simple_dict2, simple_dict3) == {
+        'a': 1, 'b': 2, 'c': 4, 'd': 3
+    }
+
+
+################################################################################
+# Dict Partition
+
+def test_dictpartition(simple_dict1):
+    assert dictpartition(simple_dict1, is_even) == ({'b': 2}, {'a': 1, 'c': 3})
+
+
+################################################################################
+# Different Numbers
+
+@pytest.fixture
+def empty_list():
+    return []
+
+
+@pytest.fixture
+def list_of_integers():
+    return [1, 2, 3, 1, 2, 3, 4, 1]
+
+
+def test_empty(empty_list):
+    assert get_unique_integers(empty_list) == 0
+
+
+def test_get_unique_integers(list_of_integers):
+    assert get_unique_integers(list_of_integers) == 4
