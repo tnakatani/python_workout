@@ -1,4 +1,0 @@
-foo bar baz
-The quick brown fox jumps over the lazy dog
-こういう　テキスト　は　理解　できるかな
-let's try emojis: 😉😍😘😚😜😂😝😳😁😣😢😰

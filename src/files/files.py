@@ -2,6 +2,7 @@ import csv, json
 import os, glob
 from functools import reduce
 from typing import Dict, Set, List, Union, Callable, Tuple
+import logging
 
 
 ################################################################################
@@ -43,10 +44,11 @@ def sum_multi_columns(file_path: str) -> int:
 ################################################################################
 # /etc/passwd to dict
 
-def passwd_to_dict(file_path: str) -> Dict[any, any]:
+def passwd_to_dict(file_path: str) -> Dict[any, Dict[str, str]]:
     """Returns a dict based on /etc/passwd in which the dict’s keys are
-    usernames and the values are the users’ IDs. Ignores comments and empty
-    lines.
+    usernames and the values are dicts with keys (and
+    appropriate values) for user ID, home directory, and shell. Ignores
+    comments and empty lines.
 
     Example:
         nobody:*:-2:-2::0:0:Unprivileged User:/var/empty:/usr/bin/false
@@ -57,9 +59,72 @@ def passwd_to_dict(file_path: str) -> Dict[any, any]:
     with open(file_path, 'r') as f:
         users = {}
         for line in f:
-            if line.startswith('#') or line.strip() == '':
+            try:
+                fields = line.strip().split(':')
+                user, id, home_dir, shell = fields[0], fields[2], \
+                                            fields[5], fields[6]
+            except IndexError as e:
+                logging.warning(f"{fields} has unexpected format, skipping")
                 continue
-            fields = line.strip().split(':')
-            user, id = fields[0], fields[2]
-            users[user] = id
+            users[user] = {'id': id, 'home_dir': home_dir, 'shell': shell}
         return users
+
+
+################################################################################
+# Word Count
+
+
+def count_chars(word_list: List[str]) -> int:
+    """Counts the number of characters from a string of tokens. Count
+    doesn't include white space delimiters or newlines.
+
+    Args:
+        text (str): a string of tokens of an arbitrary length
+
+    Returns:
+        int: Number of characters
+    """
+    count = 0
+    for char in word_list:
+        count += len(char)
+    return count
+
+
+def normalize(text):
+    """Do basic word token normalization such as lowercase, stripping
+    newline, white space delimited tokenization.
+
+    Args:
+        text (str): a string of tokens of an arbitrary length
+
+    Returns:
+        tokens (List[str]): a list of normalized word tokens
+    """
+    return text.strip().lower().split(' ')
+
+
+def word_count(file_path: str) -> Dict[str, int]:
+    """Takes a filename as input measures the following:
+    1. Number of characters (not including whitespace)
+    2. Number of words (white space delimited)
+    3. Number of lines
+    4. Number of unique words (case insensitive)
+
+    Args:
+        file_path (str): Path to text file
+    """
+    with open(file_path, 'r') as f:
+        counts = {'char_count': 0, 'word_count': 0, 'line_count': 0,
+                  'words_uniq': 0, }
+        all_words = set()
+        for line in f:
+            token_list = normalize(line)
+            counts['char_count'] += count_chars(token_list)
+            counts['word_count'] += len(token_list)
+            counts['line_count'] += 1
+            all_words.update(token_list)
+        counts['words_uniq'] = len(all_words)
+        return counts
+
+
+

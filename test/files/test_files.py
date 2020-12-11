@@ -36,7 +36,7 @@ def test_multi_columns_multi_rows():
 
 
 ################################################################################
-# passwd_to_dict
+# /etc/passwd to dict
 
 def test_passwd_to_dict():
     fake_passwd = StringIO(
@@ -46,7 +46,30 @@ def test_passwd_to_dict():
         '               \n'
         'nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false\n'
         'root:*:0:0:System Administrator:/var/root:/bin/sh\n'
-        'daemon:*:1:1:System Services:/var/root:/usr/bin/false\n')
+        'daemon:*:1:1:System Services:/var/root:/usr/bin/false\n'
+        'foobarbaz:incomplete_data:info\n'
+    )
     with mock.patch("builtins.open", return_value=fake_passwd):
-        assert passwd_to_dict('file_path') == {'nobody': '-2', 'root': '0',
-                                               'daemon': '1'}
+        assert passwd_to_dict('file_path') == {
+            'daemon': {'home_dir': '/var/root', 'id': '1',
+                       'shell': '/usr/bin/false'},
+            'nobody': {'home_dir': '/var/empty', 'id': '-2',
+                       'shell': '/usr/bin/false'},
+            'root': {'home_dir': '/var/root', 'id': '0', 'shell': '/bin/sh'}}
+
+
+################################################################################
+# Word Count
+
+def test_word_count():
+    text_file = StringIO(
+       "foo bar baz\n" # 11 chars
+       "foo bar 文書\n" # 10 chars
+    )
+    with mock.patch("builtins.open", return_value=text_file):
+        result = word_count('file_path')
+        assert result['line_count'] == 2
+        assert result['word_count'] == 6
+        assert result['words_uniq'] == 4
+        assert result['char_count'] == 17
+
