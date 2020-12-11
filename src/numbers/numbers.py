@@ -26,13 +26,12 @@ def run_timing():
     print(f'Average of {average}, over {number_of_runs} runs')
 
 
-def to_hex(*args):
+def to_hex():
     """takes a hex number and returns the decimal equivalent.
     If the user enters 50, you’ll assume that it’s a hex number (equal to 0x50)
     and will print the value 80 to the screen. """
-    if not args:
-        return args
     decnum = 0
-    for i, digit in enumerate(str(args)):
+    hexnum = input('Enter a hex number')
+    for i, digit in enumerate(reversed(hexnum)):
         decnum += int(digit, 16) * (16 ** i)
-    return decnum
+    print(decnum)
