@@ -19,4 +19,4 @@ def pig_latin(_input: str) -> str:
         else:
             result = word[1:] + word[0] + suffix_consonant
             words.append(result)
-    return ' '.join(words)
+    return " ".join(words)

@@ -4,17 +4,14 @@ import os
 from typing import Dict, Set, List, Union, Callable, Tuple
 from functools import reduce
 
-MENU = {'sandwich': 9.99,
-        'fries': 2.99,
-        'coffee': 1.99,
-        'pancakes': 6.99}
+MENU = {"sandwich": 9.99, "fries": 2.99, "coffee": 1.99, "pancakes": 6.99}
 
 TEMPS = {
-    '11/29/2020': 40,
-    '11/30/2020': 49,
-    '12/01/2020': 40,
-    '12/02/2020': 52,
-    '12/03/2020': 55,
+    "11/29/2020": 40,
+    "11/30/2020": 49,
+    "12/01/2020": 40,
+    "12/02/2020": 52,
+    "12/03/2020": 55,
 }
 
 
@@ -59,7 +56,7 @@ def restaurant(menu: Dict[str, float]) -> None:
 def get_yesterday_and_tomorrow_date(day: str) -> str:
     """Takes a date string in MM/DD/YYYY format and returns the date 1 day
     before/after in the same format"""
-    _date = datetime.strptime(day, '%m/%d/%Y')
+    _date = datetime.strptime(day, "%m/%d/%Y")
     yesterday = (_date.date() - timedelta(days=1)).strftime("%m/%d/%Y")
     tomorrow = (_date.date() + timedelta(days=1)).strftime("%m/%d/%Y")
     return yesterday, tomorrow
@@ -119,12 +116,13 @@ def rainfall_report() -> None:
         city = normalize(input("Enter the name of a city: ")).capitalize()
         if not city:
             break
-        rainfall = normalize(input(f"Enter the reported rainfall in"
-                                   f" {city} (in millimeters): "))
+        rainfall = normalize(
+            input(f"Enter the reported rainfall in" f" {city} (in millimeters): ")
+        )
         if rainfall.isdigit():
             rainfall = int(rainfall)
         else:
-            print('Not a valid value, try again.')
+            print("Not a valid value, try again.")
             continue
         # with two arguments, dict.get returns either the value associated
         # with the key or the second argument
@@ -140,15 +138,16 @@ def rainfall_report() -> None:
 ######################################################################
 # Word Length Counter
 
+
 def tokenize(text: List[str]) -> List[str]:
     """Takes in a list of newline delimited text and returns a list of string
     tokens"""
     # Remove newlines
     text = [l.rstrip() for l in text]
     # Remove full-width whitespace
-    text = [l.replace('\u3000', ' ') for l in text]
+    text = [l.replace("\u3000", " ") for l in text]
     # Split by white space
-    text = [l.split(' ') for l in text]
+    text = [l.split(" ") for l in text]
     # Flatten list of lists
     tokenized = reduce(lambda x, y: x + y, text)
     # Above is equivalent to:
@@ -164,7 +163,7 @@ def word_length_freq_table(file_path: str) -> Dict[int, int]:
     """Read through a text file on disk. Use a dict to track how many words
     of each length are in the file--that is, how many three-letter words,
     four-letter words, five-letter words, and so on."""
-    with open(file_path, 'r', encoding='utf8') as f:
+    with open(file_path, "r", encoding="utf8") as f:
         lines = f.readlines()
         tokenized = tokenize(lines)
         word_length = {}
@@ -177,8 +176,10 @@ def word_length_freq_table(file_path: str) -> Dict[int, int]:
 ################################################################################
 # Dict Diff
 
-def dictdiff(first: Dict[any, any], second: Dict[any, any]) -> Dict[
-    any, Union[any, List[any]]]:
+
+def dictdiff(
+    first: Dict[any, any], second: Dict[any, any]
+) -> Dict[any, Union[any, List[any]]]:
     """Takes two dicts as arguments. The function returns a new dict that
     expresses the difference between the two dicts.
     - If there are no differences between the dicts, returns an empty
@@ -218,8 +219,9 @@ def is_even(v: int) -> bool:
     return v % 2 == 0
 
 
-def dictpartition(d: Dict[any, any], f: Callable) -> Tuple[
-    Dict[any, any], Dict[any, any]]:
+def dictpartition(
+    d: Dict[any, any], f: Callable
+) -> Tuple[Dict[any, any], Dict[any, any]]:
     """Return two dicts, each containing key-value pairs from d. The decision
     regarding where to put each of the key-value pairs will be made according
     to the output from f, which will be run on each key-value pair in d. If f
@@ -239,9 +241,8 @@ def dictpartition(d: Dict[any, any], f: Callable) -> Tuple[
 ################################################################################
 # Different Numbers
 
+
 def get_unique_integers(numbers: List[int]) -> int:
     """Takes a single list of integers and returns the number of different
     integers it contains"""
     return len(set(numbers))
-
-

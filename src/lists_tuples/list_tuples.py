@@ -1,7 +1,7 @@
-from typing import List, Set, Tuple, Dict
 import operator
+from collections import Counter
 from operator import itemgetter
-from collections import Counter, namedtuple
+from typing import Dict, List, Tuple
 
 
 def firstlast(seq):
@@ -16,7 +16,7 @@ def firstlast(seq):
 
 
 def even_odd_sums(seq: List[int]) -> List[int]:
-    """ Return a two-element list, containing (respectively) the sum of the even
+    """Return a two-element list, containing (respectively) the sum of the even
     -indexed numbers_1 and the sum of the odd-indexed numbers_1
     """
     evens = seq[::2]
@@ -25,7 +25,7 @@ def even_odd_sums(seq: List[int]) -> List[int]:
 
 
 def plus_minus(seq: List[int]) -> int:
-    """ Return the result of alternately adding and subtracting
+    """Return the result of alternately adding and subtracting
     numbers_1 from each other"""
     result = seq.pop(0)
     while seq:
@@ -61,8 +61,7 @@ def sum_numeric(*args):
 def alphabetize_names(list_of_dicts: List[Dict]) -> List[Dict]:
     """Returns the list of dicts, but sorted by last name and then by first
     name."""
-    return sorted(list_of_dicts,
-                  key=itemgetter('last', 'first'))
+    return sorted(list_of_dicts, key=itemgetter("last", "first"))
 
     # alternate solution
     # return sorted(names, key=lambda names: (names['last'], names['first']))
@@ -71,27 +70,26 @@ def alphabetize_names(list_of_dicts: List[Dict]) -> List[Dict]:
 def count_vowels(list_of_strings: List[str]) -> List[str]:
     """Given a list of strings, sorts them according to how many vowels they
     contain."""
-    vowels = 'aeiou'
+    vowels = "aeiou"
     vowel_counts = []
     for word in list_of_strings:
         vowel_count = {}
         count = 0
         for letter in word:
             count += 1 if letter in vowels else 0
-        vowel_count['word'] = word
-        vowel_count['count'] = count
+        vowel_count["word"] = word
+        vowel_count["count"] = count
         vowel_counts.append(vowel_count)
-    sorted_dict = sorted(vowel_counts, key=itemgetter('count'))
-    sorted_list = [x['word'] for x in sorted_dict]
+    sorted_dict = sorted(vowel_counts, key=itemgetter("count"))
+    sorted_list = [x["word"] for x in sorted_dict]
     return sorted_list
 
 
 def count_vowels_v2(list_of_strings: List[str]) -> List[str]:
     """Given a list of strings, sorts them according to how many vowels they
     contain."""
-    vowels = 'aeiou'
-    return sorted(list_of_strings, key=lambda word: sum(ch in vowels for ch in
-                                                        word))
+    vowels = "aeiou"
+    return sorted(list_of_strings, key=lambda word: sum(ch in vowels for ch in word))
 
 
 def sort_summed(list_of_ints: List[List[int]]) -> List[int]:
@@ -128,9 +126,8 @@ def format_sort_records(people: Tuple[str]) -> str:
 
 def format_sort_records_v2(list_of_tuples):
     output = []
-    template = '{last:10} {first:10} {distance:5.2f}'
-    for person in sorted(list_of_tuples, key=operator.attrgetter('last', 'first')):
+    template = "{last:10} {first:10} {distance:5.2f}"
+    for person in sorted(list_of_tuples, key=operator.attrgetter("last", "first")):
         # https://docs.python.org/3/tutorial/controlflow.html#unpacking-argument-lists
         output.append(template.format(**(person._asdict())))
     return output
-

@@ -3,7 +3,7 @@ def strsort(_input: str) -> str:
     'cba' => 'abc'
     """
     result = []
-    for word in _input.split(' '):
+    for word in _input.split(" "):
         letters = [l for l in word]
-        result.append(''.join(sorted(letters)))
-    return ' '.join(result)
+        result.append("".join(sorted(letters)))
+    return " ".join(result)

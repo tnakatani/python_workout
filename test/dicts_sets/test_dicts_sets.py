@@ -160,7 +160,7 @@ def test_update_city(monkeypatch, capsys):
 Note: Had trouble figuring out whether mock.patch needed "__builtins__.open"
 or "builtins.open" or "main.open".  Still don't quite understand the nuance
 between all of them.  One important note is that the 'file_path' passed to the
-function doesn't really matter, you can pass it "file_path", "foobar", etc.
+functions doesn't really matter, you can pass it "file_path", "foobar", etc.
 
 Ref (led me to answer): https://stackoverflow.com/a/33184416/12207563
 Python doc: https://docs.python.org/3.6/library/unittest.mock.html#patch
@@ -178,7 +178,7 @@ def test_word_length_freq_table():
 # Dict Diff
 
 """
-Note to self: pytest fixtures need to passed to a test function
+Note to self: pytest fixtures need to passed to a test functions
 in order to get the return value.
 """
 
