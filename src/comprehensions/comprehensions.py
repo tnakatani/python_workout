@@ -1,5 +1,8 @@
-from collections import Counter
-from typing import Callable, Dict, Iterable, List, Tuple, Union
+import pathlib
+import re
+import string
+from collections import Counter, defaultdict
+from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
 
 
 ################################################################################
@@ -271,3 +274,114 @@ def transform_values(func: Callable, dict_obj: Dict[str, int]) -> Dict[str, int]
         dict_obj: Dictionary object with string keys and integer values
     """
     return {k: func(v) for k, v in dict_obj.items()}
+
+
+def get_filename_and_size(dir: str) -> Dict[str, int]:
+    """Takes a directory name (i.e., a string) as an argument. Returns a dict
+    in which the keys are the names of files in that directory, and the values are the file sizes.
+
+    Args:
+        dir: Path to directory
+    """
+    return {
+        pathlib.Path(fp).name: pathlib.Path(fp).stat().st_size
+        for fp in pathlib.Path(dir).iterdir()
+    }
+
+
+################################################################################
+# Supervocalic
+
+
+def get_supervocalic(words: str) -> Tuple[str]:
+    """From a sentence, finds all words that contain all vowels (a, e, i, o,and u) and return a set
+    of those words.
+
+    Args:
+        words: sequence of words
+    """
+    # Attempt 1:
+    # l = []
+    # for word in words.split(" "):
+    #     if {"a", "e", "i", "o", "u"} < set(chars for chars in word):
+    #         l.append(word)
+    # return l
+
+    # Attempt 2:
+    return tuple(
+        word
+        for word in words.split(" ")
+        if {"a", "e", "i", "o", "u"} < set(chars for chars in word)
+    )
+
+
+def contain_keywords(words: str, kw: List[str]) -> bool:
+    """From a sentence, checks if all the keywords exist in the sentence.
+
+    Args:
+        words: sequence of words
+    """
+    return True if {k for k in kw} < set(words.split(" ")) else False
+
+
+def get_passwd_shells(file_path: str) -> Set[str]:
+    """Reads a /etc/passwd and returns a tuple of all unique shells assigned to users
+
+    Args:
+        file_path: Path to file
+    """
+    with open(file_path, "r") as f:
+        return set(
+            line.strip().split(":")[-1]
+            for line in f
+            if line.strip() and "#" not in line[0]
+        )
+
+
+def get_word_lengths(file_path: str) -> Dict[int, Set[str]]:
+    """Reads a text file and returns a dictionary where the keys are the character length of words
+    and its value is an iterable that contains all unique words that have the key's character
+    length.
+
+    Args:
+        file_path: Path to file
+    """
+
+    # Attempt 1: Seems like this is not easily done with a comprehension, as it needs
+    # to initiialize a defaultdict
+    def normalize(word: str) -> str:
+        """Basic word token normalization (remove punctuation except apostrophe, lowercase)"""
+        return re.sub(r"[^\w\d']+", "", word).lower()
+
+    with open(file_path, "r") as f:
+        lengths = defaultdict(set)
+        for line in f:
+            for word in line.strip().split(" "):
+                lengths[len(word)].add(normalize(word))
+        return lengths
+
+
+################################################################################
+# Genatria
+
+
+def make_genatria() -> Dict[int, str]:
+    """Create a dict whose keys are the (lowercase) letters of the English alphabet, and whose
+    values are the numbers ranging from 1 to 26.
+    """
+    return {char: i for i, char in enumerate(string.ascii_lowercase[:27], 1)}
+
+
+def config_to_dict(file_path: str) -> Dict[str, Union[str, int]]:
+    """Convert a config file where each line of the file contains text in the form of "name=value"
+    into a "name: value" dictionary.
+
+    Args:
+        file_path: Path to file
+    """
+    # Not really worth turning this into a comprehension... difficult to read
+    with open(file_path, 'r') as f:
+        return {config.strip().split("=")[0]: int(config.strip().split("=")[1])
+                # convert value to int if digit, else keep as string
+                if config.strip().split("=")[1].isdigit() else config.strip().split("=")[1]
+                for config in f}

@@ -1,3 +1,7 @@
+from unittest import mock
+
+from io import StringIO
+
 import pytest
 
 from src.comprehensions.comprehensions import *
@@ -58,9 +62,7 @@ def book_sample(tmp_path):
     f.write_text(
         """THE MEANING OF FOUR-DIMENSIONAL SPACE.
 The main line of thought developed in these pages has no claims to originality. 
-Professor Zöllner of Leipsic was an ardent exponent of the theory in the 'seventies' and some 
-authors hold that even the ancient writings of the East contain attempts to express 
-Four-Dimensional concepts.
+Professor Zöllner of Leipsic was an ardent exponent of the theory in the 'seventies' and some authors hold that even the ancient writings of the East contain attempts to express Four-Dimensional concepts.
 """
     )
     return f
@@ -68,9 +70,7 @@ Four-Dimensional concepts.
 
 def test_filter_to_lexically_diverse(book_sample):
     assert filter_to_lexically_diverse(book_sample) == [
-        "Professor Zöllner of Leipsic was an ardent exponent of the theory in the 'seventies' and "
-        "some authors hold that even the ancient writings of the East contain attempts to express "
-        "Four-Dimensional concepts."
+        """Professor Zöllner of Leipsic was an ardent exponent of the theory in the 'seventies' and some authors hold that even the ancient writings of the East contain attempts to express Four-Dimensional concepts."""
     ]
 
 
@@ -252,8 +252,154 @@ def test_get_vowel_count():
     [
         (abs, {"a": 1, "b": -2, "c": 3}, {"a": 1, "b": 2, "c": 3}),
         (len, {"first": "foo", "last": "barbaz"}, {"first": 3, "last": 6}),
-        (lambda x: x*x, {"a": 1, "b": -2, "c": 3}, {"a": 1, "b": 4, "c": 9}),
+        (lambda x: x * x, {"a": 1, "b": -2, "c": 3}, {"a": 1, "b": 4, "c": 9}),
     ],
 )
 def test_transform_values(f, d, output):
     assert transform_values(f, d) == output
+
+
+def test_get_filename_and_size(fs):
+    fs.create_file("/home/alpha.txt", st_size=128)
+    fs.create_file("/home/beta.txt", st_size=512)
+    fs.create_file("/home/gamma.txt", st_size=256)
+    assert get_filename_and_size("/home/") == {
+        "alpha.txt": 128,
+        "beta.txt": 512,
+        "gamma.txt": 256,
+    }
+
+
+################################################################################
+# Supervocalic
+
+
+@pytest.mark.parametrize(
+    "inputs, expected",
+    [
+        (
+            "The ambidextrous clown wowed the businesswoman",
+            ("ambidextrous", "businesswoman"),
+        ),
+        (
+            "The delusional revolutionary found zen beneath a sequoia tree",
+            ("delusional", "revolutionary", "sequoia"),
+        ),
+    ],
+)
+def test_get_supervocalic(inputs, expected):
+    assert get_supervocalic(inputs) == expected
+
+
+@pytest.mark.parametrize(
+    "inputs, keywords, expected",
+    [
+        ("The ambidextrous clown wowed the businesswoman", ["clown", "wowed"], True),
+        (
+            "The delusional revolutionary found zen beneath a sequoia tree",
+            ("zen", "fern"),
+            False,
+        ),
+    ],
+)
+def test_contain_keywords(inputs, keywords, expected):
+    assert contain_keywords(inputs, keywords) == expected
+
+
+def test_passwd_to_dict():
+    fake_passwd = StringIO(
+        "###############\n"
+        "# User Database\n"
+        "###############\n"
+        "               \n"
+        "nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false\n"
+        "root:*:0:0:System Administrator:/var/root:/bin/sh\n"
+        "daemon:*:1:1:System Services:/var/root:/usr/bin/false\n"
+        "foobarbaz:incomplete_data:info\n"
+    )
+    with mock.patch("builtins.open", return_value=fake_passwd):
+        assert get_passwd_shells("file_path") == {"info", "/usr/bin/false", "/bin/sh"}
+
+
+def test_passwd_to_dict():
+    fake_passage = StringIO(
+        """The highest points on any variant of the trail are the Col des Fours in France and the Fenêtre
+d'Arpette in Switzerland, both at an altitude of 2,665 m (8,743 ft). This is not high enough 
+to cause altitude sickness for most people, nevertheless the trail provides a tough physical
+challenge. Experience of walking in mountain country is vital and, because mountain weather
+can change very rapidly, participants on the Tour du Mont Blanc should be suitably equipped."""
+    )
+    with mock.patch("builtins.open", return_value=fake_passage):
+        assert get_word_lengths("file_path") == {
+            1: {"m", "a"},
+            2: {"in", "at", "on", "to", "is", "du", "be", "an", "of"},
+            3: {"for", "des", "col", "the", "not", "can", "any", "and", "are"},
+            4: {"and", "both", "ft", "high", "mont", "most", "this", "tour", "very"},
+            5: {"fours", "trail", "2665", "cause", "tough", "vital", "blanc"},
+            6: {"should", "8743", "change", "enough", "points", "france"},
+            7: {
+                "because",
+                "country",
+                "fenêtre",
+                "highest",
+                "people",
+                "variant",
+                "walking",
+                "weather",
+            },
+            8: {
+                "altitude",
+                "mountain",
+                "physical",
+                "provides",
+                "rapidly",
+                "sickness",
+                "suitably",
+            },
+            9: {"equipped", "d'arpette"},
+            10: {"challenge", "experience"},
+            12: {"participants", "switzerland", "nevertheless"},
+        }
+
+
+################################################################################
+# Genatria
+
+
+def test_make_genatria():
+    assert make_genatria() == {
+        "a": 1,
+        "b": 2,
+        "c": 3,
+        "d": 4,
+        "e": 5,
+        "f": 6,
+        "g": 7,
+        "h": 8,
+        "i": 9,
+        "j": 10,
+        "k": 11,
+        "l": 12,
+        "m": 13,
+        "n": 14,
+        "o": 15,
+        "p": 16,
+        "q": 17,
+        "r": 18,
+        "s": 19,
+        "t": 20,
+        "u": 21,
+        "v": 22,
+        "w": 23,
+        "x": 24,
+        "y": 25,
+        "z": 26,
+    }
+
+
+def test_config_to_dict():
+    fake_config = StringIO("a=1\n"
+                           "b=2\n" 
+                           "c=/etc/passwd")
+    with mock.patch("builtins.open", return_value=fake_config):
+        assert config_to_dict("file_path") == {"a": 1, "b": 2, "c": "/etc/passwd"}
