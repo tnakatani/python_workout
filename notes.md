@@ -88,13 +88,28 @@ def test_passwd_to_dict():
 
 ## Comprehensions
 
+### List Comprehension vs For loop
+
 On using comprehensions versus `for` loops:
 > When you want to transform an iterable into a list, you should use a comprehension. But if you just want to execute something for each element of an iterable, then a traditional for loop is better.
 
-Comprehension for _tranforming_ values:
+tl;dr - Use comprehension for _tranforming_ values:
 > taking values in a list, string, dict, or other iterable and producing a new list based on it--are common in programming. You might need to transform filenames into file objects, or words into their lengths, or usernames into user IDs. In all of these cases, a comprehension is the most Pythonic solution.
 
-Going from list comprehension to generator expressions:
+Consider what your goal is, and whether you’re better served with a comprehension or a for loop; for example
+
+- Given a string, you want a list of the `ord` values for each character. This should be a list comprehension, because
+  you’re creating a list based on a string, which is iterable.
+- You have a list of dicts, in which each dict contains your friends’ first and last names, and you want to insert this
+  data into a database. In this case, you’ll use a regular `for` loop, because you’re interested in the side effects, not
+  the return value.
+
+### Going from list comprehensions to generator expressions:
+
+Generator expressions looks like a list comprehension, but uses parentheses rather than square brackets. We can use a
+generator expression in a call to `str.join`, just as we could put in a list comprehension, saving memory in the
+process.
+
 ```python
 # List Comprehension
 ", ".join([str(num + 1) for num in nums])
@@ -105,21 +120,26 @@ Going from list comprehension to generator expressions:
 
 `map` versus comprehensions
 `map` pros: `map` can take multiple iterables in its input and then apply functions that will work with each of them
+
 ```python
 import operator
+
 letters = 'abcd'
-numbers = range(1,5)
+numbers = range(1, 5)
 
 x = map(operator.mul, letters, numbers)
 print(' '.join(x))
 ```
 
 This can be done with a comprehension, but a bit more complex as we need to use `zip` to iterate through two iterables.
+
 ```python
 import operator
+
 letters = 'abcd'
-numbers = range(1,5)
+numbers = range(1, 5)
 
 print(' '.join(operator.mul(one_letter, one_number)
-              for one_letter, one_number in zip(letters, numbers)))
+               for one_letter, one_number in zip(letters, numbers)))
 ```
+
