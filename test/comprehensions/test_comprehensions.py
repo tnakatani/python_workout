@@ -367,7 +367,7 @@ can change very rapidly, participants on the Tour du Mont Blanc should be suitab
 
 
 def test_make_genatria():
-    assert make_genatria() == {
+    assert make_gematria() == {
         "a": 1,
         "b": 2,
         "c": 3,
@@ -398,8 +398,94 @@ def test_make_genatria():
 
 
 def test_config_to_dict():
-    fake_config = StringIO("a=1\n"
-                           "b=2\n" 
-                           "c=/etc/passwd")
+    fake_config = StringIO("a=1\n" "b=2\n" "c=/etc/passwd")
     with mock.patch("builtins.open", return_value=fake_config):
         assert config_to_dict("file_path") == {"a": 1, "b": 2, "c": "/etc/passwd"}
+
+
+def test_get_city_populations():
+    city_json = StringIO(
+        """[
+    {
+        "city": "New York",
+        "growth_from_2000_to_2013": "4.8%",
+        "latitude": 40.7127837,
+        "longitude": -74.0059413,
+        "population": "8405837",
+        "rank": "1",
+        "state": "New York"
+    },
+    {
+        "city": "Los Angeles",
+        "growth_from_2000_to_2013": "4.8%",
+        "latitude": 34.0522342,
+        "longitude": -118.2436849,
+        "population": "3884307",
+        "rank": "2",
+        "state": "California"
+    },
+    {
+        "city": "Chicago",
+        "growth_from_2000_to_2013": "-6.1%",
+        "latitude": 41.8781136,
+        "longitude": -87.6297982,
+        "population": "2718782",
+        "rank": "3",
+        "state": "Illinois"
+    }]"""
+    )
+    with mock.patch("builtins.open", return_value=city_json):
+        assert get_city_populations("file_path") == {
+            "New York": 8405837,
+            "Los Angeles": 3884307,
+            "Chicago": 2718782,
+        }
+
+
+################################################################################
+# Gematria pt. 2
+
+
+@pytest.mark.parametrize(
+    "inputs, expected",
+    [
+        ("", 0),
+        ("foo", 6 + 15 + 15),
+        ("bar", 2 + 1 + 18),
+        ("baz", 2 + 1 + 26),
+        ("BAZ", 2 + 1 + 26),
+    ],
+)
+def test_gematria_for(inputs, expected):
+    assert gematria_for(inputs) == expected
+
+
+def test_gematria_equal_words():
+    word_file = StringIO("foo\n" "bar\n" "baz\n" "Ofo\n")
+    with mock.patch("builtins.open", return_value=word_file):
+        assert gematria_equal_words("file_path", "oof") == ["foo", "Ofo"]
+
+
+def test_convert_book_data_to_dict():
+    book_data = [
+        ("Barack Obama", "A Promised Land Barack Obama", 23.96),
+        ("Ernest Cline", "Ready Player Two: A Novel", 17.39),
+        ("Brandon Stanton", "Humans", 17.50),
+    ]
+    assert convert_book_data_to_dict(book_data) == {
+        "A Promised Land Barack Obama": {
+            "first_name": "Barack",
+            "last_name": "Obama",
+            "price": 23.96,
+        },
+        "Ready Player Two: A Novel": {
+            "first_name": "Ernest",
+            "last_name": "Cline",
+            "price": 17.39,
+        },
+        "Humans": {
+            "first_name": "Brandon",
+            "last_name": "Stanton",
+            "price": 17.50,
+        },
+    }

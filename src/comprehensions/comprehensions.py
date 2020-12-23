@@ -1,3 +1,4 @@
+import json
 import pathlib
 import re
 import string
@@ -362,10 +363,10 @@ def get_word_lengths(file_path: str) -> Dict[int, Set[str]]:
 
 
 ################################################################################
-# Genatria
+# Genatria pt. 1
 
 
-def make_genatria() -> Dict[int, str]:
+def make_gematria() -> Dict[int, str]:
     """Create a dict whose keys are the (lowercase) letters of the English alphabet, and whose
     values are the numbers ranging from 1 to 26.
     """
@@ -380,8 +381,71 @@ def config_to_dict(file_path: str) -> Dict[str, Union[str, int]]:
         file_path: Path to file
     """
     # Not really worth turning this into a comprehension... difficult to read
-    with open(file_path, 'r') as f:
-        return {config.strip().split("=")[0]: int(config.strip().split("=")[1])
-                # convert value to int if digit, else keep as string
-                if config.strip().split("=")[1].isdigit() else config.strip().split("=")[1]
-                for config in f}
+    with open(file_path, "r") as f:
+        return {
+            config.strip().split("=")[0]: int(config.strip().split("=")[1])
+            # convert value to int if digit, else keep as string
+            if config.strip().split("=")[1].isdigit() else config.strip().split("=")[1]
+            for config in f
+        }
+
+
+def get_city_populations(file_path: str) -> Dict[str, int]:
+    """Reads a city data JSON file and returns a dict in which the keys are the city names,
+    and the values are the populations of those cities.
+
+    Args:
+        file_path: Path to city data JSON
+    """
+    with open(file_path, "r") as f:
+        result = {
+            dict_obj["city"]: int(dict_obj["population"]) for dict_obj in json.load(f)
+        }
+        return result
+
+
+################################################################################
+# Genatria pt. 2
+
+GEMATRIA = make_gematria()
+
+
+def gematria_for(word: str) -> int:
+    """Takes a single word as an argument and returns the gematria score for that word.
+    The gematria scoring is capitalization agnostic, ie. "A" and "a" both get 1.
+
+    Args:
+        word: single word token
+    """
+    # Attempt 1:
+    # return sum(GEMATRIA[char] for char in word)
+
+    # Attempt 2
+    return sum(GEMATRIA.get(char.lower(), 0) for char in word)
+
+
+def gematria_equal_words(file_path: str, word: str) -> List[str]:
+    with open(file_path, "r") as f:
+        return [line.strip() for line in f if gematria_for(line) == gematria_for(word)]
+
+
+def convert_book_data_to_dict(
+    book_data: List[Tuple[Union[str, float]]]
+) -> Dict[str, Dict[str, Union[str, float]]]:
+    """Turn a list of tuples with book data into a dict whose keys are the book’s
+    titles, with the values being another (sub -) dict, with keys for (a) the author’s first
+    name, (b) the author’s last name, and (c) the book’s price in U.S. dollars.
+
+
+    Args:
+        book_data: List of tuples in which each tuple contains three elements: (1) the author’s
+    first and last names, (2) the book’s title, and (3) the book’s price in U.S. dollars.
+    """
+    return {
+        title: {
+            "first_name": author.split()[0],
+            "last_name": author.split()[1],
+            "price": price,
+        }
+        for author, title, price in book_data
+    }
