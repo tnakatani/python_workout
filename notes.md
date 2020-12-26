@@ -11,6 +11,28 @@ Source: [stackoverflow](https://stackoverflow.com/a/51633600/12207563)
 PYTHONPATH=. pytest -o log_cli=true test/files/test_files.py::test_passwd_to_dict
 ```
 
+### Using List Comprehensions with `assert`
+
+Using list comprehensions in assertions reference:
+https://edricteo.com/list-comprehension-addiction/
+
+```python
+import pytest
+
+
+@pytest.mark.parametrize(
+    "inputs, expected",
+    [
+        (
+                ("Chocolate", "Vanilla", "Strawberry"),
+                ["Chocolate", "Vanilla", "Strawberry"],
+        )
+    ],
+)
+def test_create_scoops_with_different_iterables(inputs, expected):
+    assert all([value in expected for value in create_values(inputs)])
+```
+
 ### Mocks
 
 #### Mocking opening a file
@@ -52,6 +74,24 @@ def test_passwd_to_dict():
     with mock.patch("builtins.open", return_value=fake_passwd):
         assert passwd_to_dict('file_path') == {'nobody': '-2', 'root': '0',
                                                'daemon': '1'}
+```
+
+### Mock Writing to a File
+
+Reference: https://stackoverflow.com/a/55657594/12207563
+
+```python
+import mock
+import LogFIle
+
+
+def test_logfile():
+    open_mock = mock.mock_open()
+    with mock.patch("builtins.open", open_mock, create=True):
+        lf = LogFile('dummy.log')
+        lf.write('foobarbaz')
+    open_mock.assert_called_with("dummy.log", "w")
+    open_mock.return_value.write.assert_called_once_with("foobarbaz")
 ```
 
 ## Lists and Tuples
@@ -156,24 +196,27 @@ print(' '.join(operator.mul(one_letter, one_number)
   from mypackage import first
   ```
     - Python will go into the mypackage directory, look for first.py, and import it.
-  
+
 ### Importing a package with `__init__.py`
 
 If you import a package wholesale like:
+
 ```python
 import mypackage
 ```
 
-__If__ the package directory contains `__init__.py`, importing `mypackage` effectively means that 
-`__init__.py` is loaded, and thus executed. 
-You can, inside of that file, import one or more of the modules within the package.
+__If__ the package directory contains `__init__.py`, importing `mypackage` effectively means that
+`__init__.py` is loaded, and thus executed. You can, inside of that file, import one or more of the modules within the
+package.
 
 ### Creating a Distribution Package
 
-A __distribution package__ is a wrapper around a Python package containing information about the author, compatible 
+A __distribution package__ is a wrapper around a Python package containing information about the author, compatible
 versions, and licensing, as well as automated tests, dependencies, and installation instructions.
 
 - If your distribution package is called `mypackage`, you’ll have a directory called `mypackage`.
-- Inside that directory, among other things, will be a subdirectory called `mypackage`, which is where the Python package goes.
+- Inside that directory, among other things, will be a subdirectory called `mypackage`, which is where the Python
+  package goes.
 
-Creating a distribution package means creating a file called `setup.py`.  Here is a [tutorial](https://packaging.python.org/tutorials/packaging-projects/) from Python docs on how to create a package.
+Creating a distribution package means creating a file called `setup.py`. Here is
+a [tutorial](https://packaging.python.org/tutorials/packaging-projects/) from Python docs on how to create a package.
