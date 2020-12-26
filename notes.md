@@ -101,8 +101,8 @@ Consider what your goal is, and whether you’re better served with a comprehens
 - Given a string, you want a list of the `ord` values for each character. This should be a list comprehension, because
   you’re creating a list based on a string, which is iterable.
 - You have a list of dicts, in which each dict contains your friends’ first and last names, and you want to insert this
-  data into a database. In this case, you’ll use a regular `for` loop, because you’re interested in the side effects, not
-  the return value.
+  data into a database. In this case, you’ll use a regular `for` loop, because you’re interested in the side effects,
+  not the return value.
 
 ### Going from list comprehensions to generator expressions:
 
@@ -143,3 +143,37 @@ print(' '.join(operator.mul(one_letter, one_number)
                for one_letter, one_number in zip(letters, numbers)))
 ```
 
+## Modules
+
+### What’s the difference between a module and a package?
+
+- A __module__ is a single file, with a “.py” suffix. We can load the module using import
+- A __package__ is a directory containing one or more Python modules. For example, assume you have the
+  modules `first.py`,
+  `second.py`, and `third.py`, and want to keep them together. You can put them all into a directory, `mypackage`.
+    - Assuming that directory is in sys.path, you can then call:
+  ```python
+  from mypackage import first
+  ```
+    - Python will go into the mypackage directory, look for first.py, and import it.
+  
+### Importing a package with `__init__.py`
+
+If you import a package wholesale like:
+```python
+import mypackage
+```
+
+__If__ the package directory contains `__init__.py`, importing `mypackage` effectively means that 
+`__init__.py` is loaded, and thus executed. 
+You can, inside of that file, import one or more of the modules within the package.
+
+### Creating a Distribution Package
+
+A __distribution package__ is a wrapper around a Python package containing information about the author, compatible 
+versions, and licensing, as well as automated tests, dependencies, and installation instructions.
+
+- If your distribution package is called `mypackage`, you’ll have a directory called `mypackage`.
+- Inside that directory, among other things, will be a subdirectory called `mypackage`, which is where the Python package goes.
+
+Creating a distribution package means creating a file called `setup.py`.  Here is a [tutorial](https://packaging.python.org/tutorials/packaging-projects/) from Python docs on how to create a package.
