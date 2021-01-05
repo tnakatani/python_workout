@@ -108,6 +108,6 @@ def test_books_too_wide_for_shelf():
     b1 = Book(author="Foo Bar", title="Story of Foo", price=12.99, width=2)
     b2 = Book(author="Bar Baz", title="Story of Bar", price=10.99, width=1)
     b3 = Book(author="Baz Boz", title="Story of Baz", price=13.99, width=3)
-    s = Shelf(1)
+    s = Shelf(width=1)
     with pytest.raises(WidthTooLargeError):
-        s.add_books(b3, b2, b1)
+        s.add_books(b3)

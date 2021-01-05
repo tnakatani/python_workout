@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import ClassVar, Iterable
+from dataclasses import dataclass, field
+from typing import ClassVar, Iterable, List
 
 """
 In this exercise, you’ll define a class, Scoop, that represents a single scoop of ice cream.
@@ -104,10 +104,10 @@ class Book:
 
 @dataclass
 class Shelf:
-    books = []
+    books: List[Book] = field(default_factory=list)
     width: int = 24
 
-    def add_books(self, *books: ClassVar):
+    def add_books(self, *books: Book):
         for book in books:
             if self.total_width_of_books() + book.width > self.width:
                 raise WidthTooLargeError
