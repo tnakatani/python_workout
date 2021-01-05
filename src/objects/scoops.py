@@ -1,4 +1,5 @@
-from typing import Iterable
+from dataclasses import dataclass
+from typing import ClassVar, Iterable
 
 """
 In this exercise, you’ll define a class, Scoop, that represents a single scoop of ice cream.
@@ -48,3 +49,81 @@ class LogFile:
     def write(self, text: str):
         with open(self.filename, "w") as f:
             f.write(text)
+
+
+"""
+In the previous exercise, we created a Scoop class that represents one scoop of ice cream. If 
+we’re really going to model the real world, though, we should have another object into which we 
+can put the scoops. I thus want you to create a Bowl class, representing a bowl into which we can 
+put our ice cream, for example:
+
+s1 = Scoop('chocolate')
+s2 = Scoop('vanilla')
+s3 = Scoop('persimmon')
+
+b = Bowl()
+b.add_scoops(s1, s2)
+b.add_scoops(s3)
+print(b)
+"""
+
+
+class Bowl:
+    def __init__(self) -> None:
+        self.scoops: list[ClassVar] = []
+
+    def add_scoops(self, *new_scoops: ClassVar):
+        for scoop in new_scoops:
+            self.scoops.append(scoop)
+
+    def __repr__(self):
+        return "\n".join(scoop.flavor for scoop in self.scoops)
+
+
+"""
+1. Create a Book class that lets you create books with a title, author, and price. Then create a 
+Shelf class, onto which you can place one or more books with an add_book method. Finally, 
+add a total_price method to the Shelf class, which will total the prices of the books on the shelf.
+2. Write a method, Shelf.has_book, that takes a single string argument and returns True or False, 
+depending on whether a book with the named title exists on the shelf.
+3. Modify your Book class such that it adds another attribute, width. Then add a width attribute to 
+each instance of Shelf. When add_book tries to add books whose combined widths will be too much 
+for the shelf, raise an exception.
+
+Try replacing __init__ method with dataclasses, which are available on python 3.7 and above.
+"""
+
+
+@dataclass
+class Book:
+    author: str
+    title: str
+    price: float
+    width: int
+
+
+@dataclass
+class Shelf:
+    books = []
+    width: int = 24
+
+    def add_books(self, *books: ClassVar):
+        for book in books:
+            if self.total_width_of_books() + book.width > self.width:
+                raise WidthTooLargeError
+            else:
+                self.books.append(book)
+
+    def total_price(self):
+        return sum(book.price for book in self.books)
+
+    def has_book(self, book):
+        return True if book.lower() in [b.title.lower() for b in self.books] else False
+
+    def total_width_of_books(self):
+        return sum(b.width for b in self.books)
+
+
+class WidthTooLargeError(Exception):
+    """Raised when the total width of the books are too wide for the shelf"""
+    pass
