@@ -220,3 +220,72 @@ versions, and licensing, as well as automated tests, dependencies, and installat
 
 Creating a distribution package means creating a file called `setup.py`. Here is
 a [tutorial](https://packaging.python.org/tutorials/packaging-projects/) from Python docs on how to create a package.
+
+## Objects
+
+### Class vs Instance Attributes
+
+A Python class attribute is an attribute of the class, rather than an attribute of an instance of a class. Python
+doesn’t have constants, but we can simulate them with class attributes.
+
+```python
+class MyClass(object):
+    class_var = 1  # class attribute
+
+    def __init__(self, i_var):
+        self.i_var = i_var  # instance attribute
+```
+
+Note that all instances of the class have access to `class_var`, and that it can also be accessed as a property of the
+class itself:
+
+```python
+
+foo = MyClass(2)
+bar = MyClass(3)
+
+foo.class_var, foo.i_var
+## 1, 2
+bar.class_var, bar.i_var
+## 1, 3
+MyClass.class_var  ## <— This is key
+## 1
+```
+
+Reference: [Python Class Attributes: An Overly Thorough Guide](https://www.toptal.com/python/python-class-attributes-an-overly-thorough-guide)
+
+### Inheritance
+
+Example
+
+```python
+class Person():
+    def __init__(self, name):
+        self.name = name
+
+    def greet(self):
+        return f'Hello, {self.name}'
+
+
+class Employee(Person)
+    def __init__(self, name, id_number):
+        self.name = name
+        self.id_number = id_number
+```
+
+#### Keeping code DRY with `super`
+
+> There’s one weird thing about my implementation of `Employee`, namely that I set self.name in `__init__`. If you’re 
+> coming from a language like Java, you might be wondering why I have to set it at all, since `Person.__init__` already sets it. 
+> But that’s just the thing: in Python, `__init__ `really needs to execute for it to set the attribute. 
+> If we were to remove the setting of `self.name` from `Employee.__init__`, the attribute would never be set. 
+> By the ICPO rule, only one method would ever be called, and it would be the one that’s closest to the instance.
+> Since `Employee.__init__` is closer to the instance than `Person.__init__`, the latter is never called.
+
+Solution: `super` built-in allows us to invoke a method on a parent object without explicitly naming that parent.
+```python
+class Employee(Person)
+    def __init__(self, name, id_number):
+        super().__init__(name)
+        self.id_number = id_number
+```
