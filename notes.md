@@ -273,19 +273,78 @@ class Employee(Person)
         self.id_number = id_number
 ```
 
+#### What does `self` do?
+
+- `self` is referring to the current object.
+- The first parameter in every class method is `self`
+- Any attributes we add to self will stick around after the method returns. And so it’s natural, and thus preferred, to
+  assign a bunch of attributes to self in `__init__`.
+
+#### What does `__init__` do?
+
+`__init__` simply adds new attributes to the object.
+
+- Different from `__new__` which is a constructor, which actually creates a new object. Before it creates a new
+  instance, it looks for an invokes the `__init__` method.
+- Unlike languages such as C# and Java, we don’t just declare attributes in Python; we must actually create and assign
+  to them, at runtime, when the new instance is created.
+
 #### Keeping code DRY with `super`
 
-> There’s one weird thing about my implementation of `Employee`, namely that I set self.name in `__init__`. If you’re 
-> coming from a language like Java, you might be wondering why I have to set it at all, since `Person.__init__` already sets it. 
-> But that’s just the thing: in Python, `__init__ `really needs to execute for it to set the attribute. 
-> If we were to remove the setting of `self.name` from `Employee.__init__`, the attribute would never be set. 
+> There’s one weird thing about my implementation of `Employee`, namely that I set self.name in `__init__`. If you’re
+> coming from a language like Java, you might be wondering why I have to set it at all, since `Person.__init__` already sets it.
+> But that’s just the thing: in Python, `__init__ `really needs to execute for it to set the attribute.
+> If we were to remove the setting of `self.name` from `Employee.__init__`, the attribute would never be set.
 > By the ICPO rule, only one method would ever be called, and it would be the one that’s closest to the instance.
 > Since `Employee.__init__` is closer to the instance than `Person.__init__`, the latter is never called.
 
 Solution: `super` built-in allows us to invoke a method on a parent object without explicitly naming that parent.
+
 ```python
 class Employee(Person)
     def __init__(self, name, id_number):
         super().__init__(name)
         self.id_number = id_number
 ```
+
+#### Abstract Base Classes
+
+_Abstract base classes_ are classes that are never instantiated on its own, but various subclasses will inherit.
+
+- In python, you don't need to explicitly declare a class to be abstract.
+- However, you _can_ import `ABCMeta` from the [`abc` module](https://docs.python.org/3/library/abc.html).
+
+#### Subclass attribute vs __init__ method
+
+- If there is a default attribute for a subclass that is not going to change, consider just setting it as a subclass
+  attribute rather than setting it as an attribute initialized in the `__init__` method in the parent class.
+  ```python
+  # Parent class
+  class Animal:
+      def __init__(self, color):
+          # Turn the current class object into a string
+          self.species: str = self.__class__.__name__
+          self.color: str = color
+
+      def __repr__(self):
+          return f"{self.color} {self.species}, {self.number_of_legs} legs".lower()
+
+  # Child class - just sets number_of_legs as class attribute rather than setting it as __init__ attribute in parent.
+  class Wolf(Animal):
+      number_of_legs = 4
+
+      def __init__(self, color):
+          super().__init__(color)
+
+  ```
+
+## Limits of OOP principles in Python
+
+> Whether this is right or wrong, (directly accessing data in other objects) is fairly common in the Python
+> world. Because all data is public (i.e., there’s no private or protected), it’s considered a good and reasonable thing
+> to just scoop the data out of objects. That said, this also means that whoever writes a class has a 
+> responsibility to document it, and to keep the API alive--or to document elements that may be deprecated or 
+> removed in the future.
+
+> (Unlike Python) In many languages, object-oriented programming is forced on you, such that you’re constantly 
+> trying to fit your  programming into its syntax and structure.
