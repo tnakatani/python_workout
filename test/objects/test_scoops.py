@@ -1,17 +1,28 @@
-from io import StringIO
-
 import mock
 import pytest
 
 from src.objects.scoops import (
+    BigBowl,
+    BowlWithLimitedScoops,
+    Bread,
     LogFile,
+    MaxScoopExceeded,
+    Person,
+    Phone,
     Scoop,
+    SmartPhone,
+    Transaction,
+    WheatBread,
     WidthTooLargeError,
     create_scoops,
     Beverage,
     Bowl,
     Book,
     Shelf,
+    Envelope,
+    BigEnvelope,
+    InsufficientPostage,
+    Iphone,
 )
 
 
@@ -111,3 +122,110 @@ def test_books_too_wide_for_shelf():
     s = Shelf(width=1)
     with pytest.raises(WidthTooLargeError):
         s.add_books(b3)
+
+
+def test_too_many_scoops():
+    s1 = Scoop("chocolate")
+
+    b = BowlWithLimitedScoops()
+    with pytest.raises(MaxScoopExceeded):
+        b.add_scoops(s1, s1, s1, s1)
+
+
+def test_population():
+    p1 = Person()
+    p2 = Person()
+    p3 = Person()
+    p4 = Person()
+    p5 = Person()
+    assert Person.population == 5
+
+
+def test_population_deletion():
+    p1 = Person()
+    p2 = Person()
+    p3 = Person()
+    p4 = Person()
+    p5 = Person()
+    for p in [p1, p2, p3, p4, p5]:
+        p.__del__()
+    assert Person.population == 0
+
+
+def test_transactions():
+    t1 = Transaction(25)
+    t2 = Transaction(5)
+    t3 = Transaction(-10)
+    assert Transaction.balance == 20
+
+
+def test_too_many_scoops_bigbowl():
+    s1 = Scoop("chocolate")
+    b = BigBowl()
+    with pytest.raises(MaxScoopExceeded):
+        b.add_scoops(s1, s1, s1, s1, s1, s1)
+
+
+def test_envelope_with_insufficient_postage():
+    e1 = Envelope(weight=200, postage=0)
+    with pytest.raises(InsufficientPostage):
+        e1.send()
+    assert e1.was_sent == False
+
+
+def test_envelope_with_sufficient_postage():
+    e1 = Envelope(weight=200, postage=4000)
+    e1.send()
+    assert e1.was_sent == True
+
+
+def test_bigenvelope_with_insufficient_postage():
+    e1 = BigEnvelope(weight=200, postage=0)
+    with pytest.raises(InsufficientPostage):
+        e1.send()
+    assert e1.was_sent == False
+
+
+def test_bigenvelope_with_sufficient_postage():
+    e1 = BigEnvelope(weight=200, postage=5000)
+    e1.send()
+    assert e1.postage_needed() == 3000
+    assert e1.was_sent == True
+
+
+def test_phone():
+    p1 = Phone("1234567890")
+    assert p1.format_phone_number() == "123-456-7890"
+
+
+def test_smartphone():
+    p1 = SmartPhone("1234567890")
+    p1.run_app()
+    assert p1.app_on == True
+
+
+def test_iphone():
+    p1 = Iphone("1113339876")
+    assert p1.dial() == "one-one-one-three-three-three-nine-eight-seven-six"
+
+
+def test_bread_with_two_slices():
+    b1 = Bread()
+    assert b1.get_nutrition(2) == {
+        "calories": 134,
+        "carbohydrates": 26,
+        "fat": 2.2,
+        "sodium": 0.288,
+        "sugar": 2.8,
+    }
+
+
+def test_wheat_bread_with_three_slices():
+    b1 = WheatBread()
+    assert b1.get_nutrition(3) == {
+        "calories": 240,
+        "carbohydrates": 60,
+        "fat": 0,
+        "sodium": 0.51,
+        "sugar": 12,
+    }
