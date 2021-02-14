@@ -1,19 +1,32 @@
 import mock
 import pytest
 
-from src.objects.scoops import (
+from src.objects.objects import (
     BigBowl,
     BowlWithLimitedScoops,
     Bread,
+    Cage,
+    FlatList,
+    FlexibleDict,
+    IncompatibleAnimals,
     LogFile,
+    MaxCapacityExceeded,
     MaxScoopExceeded,
+    MaxSpaceExceeded,
+    Parrot,
     Person,
     Phone,
+    RecentDict,
     Scoop,
+    Sheep,
     SmartPhone,
+    Snake,
+    StringKeyDict,
     Transaction,
     WheatBread,
     WidthTooLargeError,
+    Wolf,
+    Zoo,
     create_scoops,
     Beverage,
     Bowl,
@@ -229,3 +242,167 @@ def test_wheat_bread_with_three_slices():
         "sodium": 0.51,
         "sugar": 12,
     }
+
+
+def test_flexibledict():
+    fd = FlexibleDict()
+
+    fd["a"] = 100
+    assert fd["a"] == 100
+
+    fd[5] = 500
+    assert fd[5] == 500
+
+    fd[1] = 100
+    assert fd[1] == 100
+    assert fd["1"] == 100
+
+    fd["1"] = 100
+    assert fd[1] == 100
+    assert fd["1"] == 100
+
+
+def test_stringkeydict():
+    sd = StringKeyDict()
+    sd[1] = 100
+    assert sd["1"] == 100
+
+
+def test_stringkeydict_fails_with_int_key():
+    sd = StringKeyDict()
+    sd[1] = 100
+    with pytest.raises(KeyError):
+        sd[1]
+
+
+def test_recentdict_only_has_last_5_added_keys():
+    rd = RecentDict(maxsize=5)
+    for i in range(10):
+        rd[i] = i * 100
+    assert list(rd.keys()) == [5, 6, 7, 8, 9]
+
+
+def test_flatlist_with_one_list_appended_has_multiple_keys():
+    fl = FlatList()
+    fl.append([10, 20, 30])
+    assert len(fl) == 3
+
+
+@pytest.mark.parametrize(
+    "species, color, output",
+    [
+        (Wolf, "black", "black wolf, 4 legs"),
+        (Sheep, "white", "white sheep, 4 legs"),
+        (Snake, "brown", "brown snake, 0 legs"),
+        (Parrot, "green", "green parrot, 2 legs"),
+    ],
+)
+def test_animal(species, color, output):
+    a = species(color)
+    assert str(a) == output
+
+
+def test_cage_with_capacity():
+    c = Cage(5)
+    assert c.id and c.animals == []
+    assert c.max_capacity == 5
+
+
+def test_add_animals_to_cages():
+    c = Cage(max_capacity=5, max_space=10000)
+    sheep1 = Sheep("black")
+    sheep2 = Sheep("white")
+    parrot1 = Parrot("green")
+    parrot2 = Parrot("red")
+    parrot3 = Parrot("violet")
+
+    c.add_animals(sheep1, sheep2, parrot1)
+    assert len(c.animals) == 3
+    c.add_animals(parrot2, parrot3)
+    assert len(c.animals) == 5
+
+
+def test_add_animals_more_than_max_capacity_fails():
+    c = Cage(max_capacity=1)
+    wolf = Wolf("black")
+    snake = Snake("white")
+    with pytest.raises(MaxCapacityExceeded):
+        c.add_animals(wolf, snake)
+
+
+def test_add_animals_more_than_max_space_fails():
+    c = Cage(max_capacity=5, max_space=1)
+    wolf = Wolf("black")
+    snake = Snake("white")
+    with pytest.raises(MaxSpaceExceeded):
+        c.add_animals(wolf, snake)
+
+
+def test_add_incompatable_animals_fail():
+    c = Cage(max_capacity=5, max_space=20000)
+    wolf = Wolf("black")
+    sheep = Sheep("white")
+    with pytest.raises(IncompatibleAnimals):
+        c.add_animals(wolf, sheep, sheep)
+
+
+####################################################################################################
+# e45: Zoo
+
+
+def test_cage():
+    z = Zoo()
+    c1 = Cage(max_capacity=5, max_space=20000)
+    c2 = Cage(max_capacity=5, max_space=20000)
+    wolf1 = Wolf("black")
+    wolf2 = Wolf("white")
+    sheep1 = Sheep("white")
+    sheep2 = Sheep("grey")
+    c1.add_animals(wolf1, wolf2)
+    c2.add_animals(sheep1, sheep2)
+    z.add_cages(c1, c2)
+    assert len(z.cages) == 2
+
+
+def test_animals_by_color():
+    z = Zoo()
+    c1 = Cage(max_capacity=5, max_space=20000)
+    c2 = Cage(max_capacity=5, max_space=20000)
+    wolf1 = Wolf("black")
+    wolf2 = Wolf("white")
+    sheep1 = Sheep("white")
+    sheep2 = Sheep("grey")
+    c1.add_animals(wolf1, wolf2)
+    c2.add_animals(sheep1, sheep2)
+    z.add_cages(c1, c2)
+    assert z.animals_by_color("white") == [wolf2, sheep1]
+
+
+def test_animals_by_number_of_legs():
+    z = Zoo()
+    c1 = Cage(max_capacity=5, max_space=20000)
+    c2 = Cage(max_capacity=5, max_space=20000)
+    wolf1 = Wolf("black")
+    wolf2 = Wolf("white")
+    parrot1 = Parrot("white")
+    parrot2 = Parrot("grey")
+    c1.add_animals(wolf1, wolf2)
+    c2.add_animals(parrot1, parrot2)
+    z.add_cages(c1, c2)
+    assert z.animals_by_legs(2) == [parrot1, parrot2]
+
+
+def test_animals_by_total_legs():
+    z = Zoo()
+    c1 = Cage(max_capacity=5, max_space=20000)
+    c2 = Cage(max_capacity=5, max_space=20000)
+    wolf1 = Wolf("black")
+    wolf2 = Wolf("white")
+    wolf3 = Wolf("grey")
+    parrot1 = Parrot("white")
+    parrot2 = Parrot("grey")
+    sheep = Sheep("grey")
+    c1.add_animals(wolf1, wolf2)
+    c2.add_animals(parrot1, parrot2, sheep)
+    z.add_cages(c1, c2)
+    assert z.total_legs() == 16
