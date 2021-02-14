@@ -36,9 +36,19 @@ conda env export > environment.yaml
 │   ├── lists_tuples
 │   │   ├── __init__.py
 │   │   └── list_tuples.py
+│   ├── modules
+│   │   ├── menu
+│   │   │   ├── call_menu.py
+│   │   │   └── menu.py
+│   │   └── tax
+│   │       ├── calculate_tax.py
+│   │       └── freedonia.py
 │   ├── numbers
 │   │   ├── __init__.py
 │   │   └── numbers.py
+│   ├── objects
+│   │   ├── dummy.log
+│   │   └── objects.py
 │   └── strings
 │       ├── __init__.py
 │       ├── pig_latin.py
@@ -59,16 +69,24 @@ conda env export > environment.yaml
     ├── lists_tuples
     │   ├── __init__.py
     │   └── test_list_tuples.py
+    ├── modules
+    │   └── tax
+    │       └── test_calculate_tax.py
     ├── numbers
     │   ├── __init__.py
     │   ├── test_mysum.py
     │   ├── test_run_timing.py
     │   └── test_to_hex.py
+    ├── objects
+    │   ├── dummy.log
+    │   └── test_objects.py
+    ├── output.tsv
+    ├── output.txt
     └── strings
         ├── __init__.py
         ├── test_pig_latin.py
         ├── test_strsort.py
         └── test_ubbi_dubbi.py
 
-17 directories, 36 files
-```
+24 directories, 47 files
+"""
