@@ -1,5 +1,37 @@
 # Python Workout Notes
 
+<!-- toc -->
+
+- [Notes on Testing with pytest](#notes-on-testing-with-pytest)
+    * [Showing logs like `print` and `logging` in your test](#showing-logs-like-print-and-logging-in-your-test)
+    * [Using List Comprehensions with `assert`](#using-list-comprehensions-with-assert)
+    * [Mocks](#mocks)
+        + [Mocking opening a file](#mocking-opening-a-file)
+    * [Mock Writing to a File](#mock-writing-to-a-file)
+- [Lists and Tuples](#lists-and-tuples)
+- [Dicts and Sets](#dicts-and-sets)
+- [Files](#files)
+- [Functions](#functions)
+- [Comprehensions](#comprehensions)
+    * [List Comprehension vs For loop](#list-comprehension-vs-for-loop)
+    * [Going from list comprehensions to generator expressions:](#going-from-list-comprehensions-to-generator-expressions)
+- [Modules](#modules)
+    * [What’s the difference between a module and a package?](#whats-the-difference-between-a-module-and-a-package)
+    * [Importing a package with `__init__.py`](#importing-a-package-with-__init__py)
+    * [Creating a Distribution Package](#creating-a-distribution-package)
+- [Objects](#objects)
+    * [Class vs Instance Attributes](#class-vs-instance-attributes)
+    * [Inheritance](#inheritance)
+        + [What does `self` do?](#what-does-self-do)
+        + [What does `__init__` do?](#what-does-__init__-do)
+        + [Keeping code DRY with `super`](#keeping-code-dry-with-super)
+        + [Abstract Base Classes](#abstract-base-classes)
+        + [Subclass attribute vs __init__ method](#subclass-attribute-vs-__init__-method)
+    * [Limits of OOP principles in Python](#limits-of-oop-principles-in-python)
+- [Iterators and Generators](#iterators-and-generators)
+
+<!-- tocstop -->
+
 ## Notes on Testing with pytest
 
 ### Showing logs like `print` and `logging` in your test
@@ -338,13 +370,182 @@ _Abstract base classes_ are classes that are never instantiated on its own, but 
 
   ```
 
-## Limits of OOP principles in Python
+### Limits of OOP principles in Python
 
 > Whether this is right or wrong, (directly accessing data in other objects) is fairly common in the Python
 > world. Because all data is public (i.e., there’s no private or protected), it’s considered a good and reasonable thing
-> to just scoop the data out of objects. That said, this also means that whoever writes a class has a 
-> responsibility to document it, and to keep the API alive--or to document elements that may be deprecated or 
+> to just scoop the data out of objects. That said, this also means that whoever writes a class has a
+> responsibility to document it, and to keep the API alive--or to document elements that may be deprecated or
 > removed in the future.
 
-> (Unlike Python) In many languages, object-oriented programming is forced on you, such that you’re constantly 
+> (Unlike Python) In many languages, object-oriented programming is forced on you, such that you’re constantly
 > trying to fit your  programming into its syntax and structure.
+
+## Iterators and Generators
+
+### Iterator protocol
+
+1. `__iter__` returns an iterator
+2. `__next__` must be defined on the iterator
+3. `StopIteration` exception which the iterator raises to signal the end of the iterations
+
+- Strings, lists, and dicts are iterable. Integers aren't.
+- Other objects (e.g. files) are also iterable.
+- You can make your own classes iterable by adding the iterator protocol on your object.
+
+### How a `for` loop actually works
+
+1. Verifies object is iterable using the `iter` built-in.  `iter` invokes the `__iter__` method on the target object.
+2. If the object is iterable, the `for` loop invokes the `next` built-in on the iterator, which invokes `__next__` on
+   the iterator.
+3. If `__next__` raises a `StopIteration` exception, the loop exits.
+
+### Common Qs
+
+1. "Why isn't there an index?"
+
+- C-like languages require a numeric index to keep track of the location.
+- In Python, the object itself is responsible for producing the next item. It doesn't know the index of the loop but it
+  does know when it has reached the end.
+
+2. "Why do different object behave differently in for loops?"
+
+- Strings return characters, dicts return keys, files return lines. How come?
+- Short answer is that each object can return whatever it wants!  Those above are its defaults.
+
+### How to make a class iterable
+
+1. Define an `__iter__` method that takes only `self` as an arg, and returns `self`.
+
+- ie. Python: "Are you an iterable", Class: "Yes, and I'm my own iterator"
+
+2. Define a `__next__` method that takes only `self` as an arg. It should either return a value, or
+   raise `StopIteration` when it runs out of values.
+
+#### Example of a class with its own iterator
+
+```py
+class LoudIterator():
+    def __init__(self, data):
+        print('\tNow in __init__')
+        self.data = data
+        self.index = 0
+
+    def __iter__(self):
+        print('\tNow in __iter__')
+        return self
+
+    def __next__(self):
+        print('\tNow in __next__')
+        if self.index >= len(self.data):
+            print(
+                f'\tself.index ({self.index}) is too big; exiting')
+            raise StopIteration
+
+        value = self.data[self.index]
+        self.index += 1
+        print('\tGot value {value}, incremented index to {self.index}')
+        return value
+
+
+for one_item in LoudIterator('abc'):
+    print(one_item)
+
+# prints
+"""
+Now in __init__
+       Now in __iter__
+       Now in __next__
+       Got value a, incremented index to 1
+a
+       Now in __next__
+       Got value b, incremented index to 2
+b
+       Now in __next__
+       Got value c, incremented index to 3
+c
+       Now in __next__
+       self.index (3) is too big; exiting
+"""
+```
+
+### Generator Functions
+
+Generators look like functions, but when executed acts like an iterator.
+
+The example below, when run, doesn't execute but rather returns a generator object.
+
+```py
+def foo():
+    yield 1
+    yield 2
+    yield 3
+```
+
+This can be saved as a variable and put in a `for` loop. With each iteration, the function executes through the
+next `yield` statement, returns the value it got from `yield`, then waits for the next iteration. When the generator
+function exits, it automatically raises `StopIteration` to close the loop.
+
+```py
+g = foo()
+for i in g:
+    print(i)
+```
+
+#### Iterable vs Iterator
+
+- An __iterable object__ can be put inside a for loop / list comprehension. Requires `__iter__` method, which returns an
+  iterator.
+- An __iterator__ is an object that implements the `__next__` method.
+
+### Iterator term chart
+
+| Term                | What is it?                                                                      | Example                                                                               | To learn more                            |
+| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------- |
+| iter                | A built-in function that returns an object’s iterator                            | iter('abcd')                                                                          | [http://mng.bz/jgja](http://mng.bz/jgja) |
+| next                | A built-in function that requests the next object from an iterator               | next(i)                                                                               | [http://mng.bz/WPBg](http://mng.bz/WPBg) |
+| StopIteration       | An exception raised to indicate the end of a loop                                | raise StopIteration                                                                   | [http://mng.bz/8p0K](http://mng.bz/8p0K) |
+| enumerate           | Helps us to number elements of iterables                                         | for i, c in enumerate('ab'):<br>print(f'{i}: {c}')                                    | [http://mng.bz/qM1K](http://mng.bz/qM1K) |
+| Iterables           | A category of data in Python                                                     | Iterables can be put in for loops or passed to many functions.                        | [http://mng.bz/EdDq](http://mng.bz/EdDq) |
+| itertools           | A module with many classes for implementing iterables                            | import itertools                                                                      | [http://mng.bz/NK4E](http://mng.bz/NK4E) |
+| range               | Returns an iterable sequence of integers                                         | \# every 3rd integer, from 10<br>\# to (not including) 50<br>range(10, 50, 3)         | [http://mng.bz/B2DJ](http://mng.bz/B2DJ) |
+| os.listdir          | Returns a list of files in a directory                                           | os.listdir('/etc/')                                                                   | [http://mng.bz/YreB](http://mng.bz/YreB) |
+| os.walk             | Iterates over the files in a directory                                           | os.walk('/etc/')                                                                      | [http://mng.bz/D2Ky](http://mng.bz/D2Ky) |
+| yield               | Returns control to the loop temporarily, optionally returning a value            | yield 5                                                                               | [http://mng.bz/lG9j](http://mng.bz/lG9j) |
+| os.path.join        | Returns a string based on the path components                                    | os.path.join('etc', 'passwd')                                                         | [http://mng.bz/oPPM](http://mng.bz/oPPM) |
+| time.perf\_ counter | Returns the number of elapsed seconds (as a float) since the program was started | time.perf\_counter()                                                                  | [http://mng.bz/B21v](http://mng.bz/B21v) |
+| zip                 | Takes n iterables as arguments and returns an iterator of tuples of length n     | \# returns \[('a', 10),<br>\# ('b', 20), ('c', 30)\]<br>zip('abc',<br>\[10, 20, 30\]) | [http://mng.bz/Jyzv](http://mng.bz/Jyzv) |
+
+### Iterator gotcha: `__iter__` in multi-class cases
+
+Problem: Below will throw nothing for B, because the same iterator object is being used.
+
+```python
+e = MyEnumerate('abc')
+
+print('** A **')
+for index, one_item in e:
+    print(f'{index}: {one_item}')
+
+print('** B **')
+for index, one_item in e:
+    print(f'{index}: {one_item}')
+```
+
+Solution: Implement `__iter__` on the main class, but its job is to return a new instance of the helper class.
+
+```python
+# in MyEnumerate
+
+def __iter__(self):
+    return MyEnumerateIterator(self.data)
+```
+
+Then we define `MyEnumerateIterator`, a new and separate class, whose `__init__` looks much like the one we already
+defined for MyIterator and whose `__next__` is taken directly from `MyIterator`.
+
+Advantages to this design:
+
+1. We can put our iterable in as many for loops as we want, without having to worry that it’ll lose the iterations
+   somehow
+2. More organized, as we're keeping iteration logic (ie. `__next__`) in a separate class.
