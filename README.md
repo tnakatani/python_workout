@@ -13,8 +13,6 @@ conda env export > environment.yaml
 ## Repo at a glance
 
 ```
-# tree -I __pycache__ | pbcopy
-
 .
 ├── README.md
 ├── __init__.py
@@ -33,6 +31,9 @@ conda env export > environment.yaml
 │   │   └── files.py
 │   ├── functions
 │   │   └── functions.py
+│   ├── iterators_generators
+│   │   ├── __init__.py
+│   │   └── iterators_generators.py
 │   ├── lists_tuples
 │   │   ├── __init__.py
 │   │   └── list_tuples.py
@@ -47,6 +48,7 @@ conda env export > environment.yaml
 │   │   ├── __init__.py
 │   │   └── numbers.py
 │   ├── objects
+│   │   ├── __init__.py
 │   │   ├── dummy.log
 │   │   └── objects.py
 │   └── strings
@@ -66,6 +68,9 @@ conda env export > environment.yaml
     │   └── test_files.py
     ├── functions
     │   └── functions.py
+    ├── iterators_generators
+    │   ├── __init__.py
+    │   └── test_iterators_generators.py
     ├── lists_tuples
     │   ├── __init__.py
     │   └── test_list_tuples.py
@@ -88,5 +93,6 @@ conda env export > environment.yaml
         ├── test_strsort.py
         └── test_ubbi_dubbi.py
 
-24 directories, 47 files
+26 directories, 52 files
+
 ```
