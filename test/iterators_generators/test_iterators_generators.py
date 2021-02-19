@@ -1,13 +1,17 @@
+import os
+
 import mock
 import pytest
+
 from src.iterators_generators.iterators_generators import (
     Circle,
     CircleInherit,
     Circle_2,
     MyEnumerate,
     MyRange,
+    all_lines,
     circle,
-    my_generator,
+    my_generator, parallel_lines,
 )
 
 ####################################################################################################
@@ -125,3 +129,60 @@ def test_circle_generator(inputs, expected):
 def test_myrange(inputs, expected):
     r = MyRange(inputs[0], inputs[1], inputs[2])
     assert [i for i in r] == expected
+
+
+def test_myrange_with_defaults():
+    r = MyRange(0, 5)
+    s = MyRange(10)
+    t = MyRange(0)
+    assert [i for i in r] == [0, 1, 2, 3, 4]
+    assert [i for i in s] == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    assert [i for i in t] == []
+
+
+####################################################################################################
+# e48: All of the files
+
+
+@pytest.fixture
+def test_dir(tmp_path):
+    f = tmp_path / "f1.txt"
+    g = tmp_path / "f2.txt"
+    h = tmp_path / "f3.txt"
+    i = tmp_path / "f4.txt"
+
+    f.write_text("\n".join(["foo", "bar", "baz"]))
+    g.write_text("\n".join(["one", "two", "three"]))
+    h.write_text(
+        """This is the first line of a big file
+and this is the second line
+and this is, to no one's surprise, the third line
+but the biggest word will probably be encyclopedia"""
+    )
+    i.write_text("")
+    return tmp_path
+
+
+def test_all_lines(test_dir):
+    assert len([i for i in all_lines(test_dir)]) == 10
+
+
+@pytest.fixture
+def test_empty_dir(tmp_path):
+    return tmp_path
+
+
+def test_all_lines_empty_dir(test_empty_dir):
+    assert len([i for i in all_lines(test_empty_dir)]) == 0
+
+
+def test_parallel_lines(test_dir):
+    result = [i for i in parallel_lines(test_dir) if i]
+    print(result)
+    assert len(result) == 10
+
+
+def test_parallel_lines_with_filter(test_dir):
+    result = [i for i in parallel_lines(test_dir, 'foo') if i]
+    print(result)
+    assert len(result) == 1

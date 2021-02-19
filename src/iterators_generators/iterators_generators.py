@@ -14,6 +14,8 @@ BTE 1: Rewrite MyEnumerate such that it uses a helper class (MyEnumerateIterator
 BTE 2: Add a second, optional argument--an integer, representing the first index that should be
        used.  This is handy for implementing one-indexed arrays.
 """
+import os
+from typing import Iterable, List
 
 
 class MyEnumerate:
@@ -141,11 +143,15 @@ def my_generator(data, start: int = 0):
 
 
 def circle(data, end: int = 0):
-    index = 0
-    while end:
-        yield (data[index % len(data)])
-        index += 1
-        end -= 1
+    for index in range(end):
+        yield data[index % len(data)]
+
+    # Attempt 1:
+    # index = 0
+    # while end:
+    #     yield (data[index % len(data)])
+    #     index += 1
+    #     end -= 1
 
 
 """
@@ -155,14 +161,24 @@ subscriptable. Don’t worry about that.) The class, like range, should take one
 integer arguments.
 """
 
+
 class MyRange:
-    def __init__(self, start: int = 0, stop: int = 0, step: int = 1):
-        self.start = start
-        self.stop = stop
+    def __init__(self, start: int, stop: int = None, step: int = 1):
+        if stop is None:
+            self.start = 0
+            self.stop = start
+        else:
+            self.start = start
+            self.stop = stop
         self.step = step
 
+        # Attempt 1:
+        # self.start = 0 if stop is None else start
+        # self.stop = start if stop is None else stop
+        # self.step = step
+
     def __iter__(self):
-       return self
+        return self
 
     def __next__(self):
         if self.start >= self.stop:
@@ -170,3 +186,105 @@ class MyRange:
         value = self.start
         self.start += self.step
         return value
+
+
+####################################################################################################
+# e48: All of the Files
+"""
+Create a generator function that will take a directory name as an argument. With each iteration, 
+the generator should return a single string, representing one line from one file in that 
+directory. Thus, if the directory contains five files, and each file contains 10 lines, 
+the generator will return a total of 50 strings--each of the lines from file 0, then each of the 
+lines from file 1, then each of the lines from file 2, until it gets through all of the lines 
+from file 4. If you encounter a file that can’t be opened, it will ignore it and move on.
+
+BTE 1: Modify all_lines such that it doesn’t return a string with each iteration, but rather a 
+tuple. The tuple should contain four elements: the name of the file, the current number of the 
+file (from all those returned by os.listdir), the line number within the current file, 
+and the current line.
+"""
+
+
+def all_lines(path: str) -> Iterable:
+    index = 0
+    for file in os.listdir(path):
+        fp = os.path.join(path, file)
+        line_num = 0
+        try:
+            for line in open(fp):
+                yield (
+                    file,
+                    f"file_index: {index}",
+                    f"line_index: {line_num}",
+                    line.strip(),
+                )
+                line_num += 1
+        except OSError:
+            pass
+        finally:
+            index += 1
+
+
+"""
+BTE 2: Modify the function such that it returns the first line from each file, and then the 
+second line from each file, until all lines from all files are returned. When you finish printing 
+lines from shorter files, ignore those files while continuing to display lines from the longer 
+files.
+
+Note to self: This one is difficult.  I still don't entirely understand how the implementation is 
+working.
+
+BTE 3: Modify all_lines such that it takes two arguments--a directory name, and a string. Only 
+those lines containing the string (i.e., for which you can say s in line) should be returned.
+"""
+
+
+def open_file_safely(filename: str) -> List[Iterable]:
+    try:
+        return open(filename)
+    except OSError:
+        pass
+
+
+def parallel_lines(path: str, filter_str: str = None) -> Iterable:
+    """Returns the first line from each file, and then the second line from each file, until all
+    lines from all files are returned. When you finish printing lines from shorter files,
+    ignore those files while continuing to display lines from the longer files"""
+
+    # read all files at once - returns a list of io.TextIOWrappers
+    all_files = [
+        open_file_safely(os.path.join(path, filename)) for filename in os.listdir(path)
+    ]
+
+    # iterate over each file. if file is empty, remove it from all_files
+    while all_files:
+        for one_file in all_files:
+            if one_file is None:
+                all_files.remove(one_file)
+                continue  # go back to beginning of loop
+            one_line = one_file.readline().strip()
+
+            # yield a line of text. if file is exhausted of lines remove file from all_files
+            # yield only filter string matches if filter_str is enabled
+            if filter_str:
+                yield (
+                    os.path.basename(one_file.name),
+                    one_line,
+                ) if one_line and filter_str in one_line else all_files.remove(one_file)
+            else:
+                yield (
+                    os.path.basename(one_file.name),
+                    one_line,
+                ) if one_line else all_files.remove(one_file)
+
+    # Attempt 1: Doesn't work. Only iterates through files once.
+    # file_index = 0
+    # for i in range(len(files)):
+    #     fp = os.path.join(path, files[i])
+    #     with open(fp) as f:
+    #         try:
+    #             yield f.readline()
+    #         except OSError:
+    #             pass
+    #         finally:
+    #             file_index += i
