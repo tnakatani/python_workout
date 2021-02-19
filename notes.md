@@ -549,3 +549,13 @@ Advantages to this design:
 1. We can put our iterable in as many for loops as we want, without having to worry that it’ll lose the iterations
    somehow
 2. More organized, as we're keeping iteration logic (ie. `__next__`) in a separate class.
+
+### Stopping Generator Functions
+
+- In a generator function, `yield` indicates that you want to keep the generator going and return a value for 
+  the current iteration, while `return` indicates that you want to exit completely.
+- In generator functions, don't explicitly raise `StopIteration`. That happens automatically when the generator 
+  reaches the end of the function. 
+- If you want to exit from the function prematurely, use a `return` statement. 
+- Using a `return` with a value (e.g., return 5) from a generator function won't throw an error, but the value will be 
+  ignored. 
