@@ -381,7 +381,24 @@ _Abstract base classes_ are classes that are never instantiated on its own, but 
 > (Unlike Python) In many languages, object-oriented programming is forced on you, such that you’re constantly
 > trying to fit your  programming into its syntax and structure.
 
+---
+
 ## Iterators and Generators
+
+There are at least three different ways to create an iterator:
+
+1. Add the appropriate methods to a class
+2. Write a generator function
+3. Use a generator expression
+
+> The iterator protocol is both common and useful in Python. By now, it’s a bit of a chicken-and-egg situation--is it worth adding the iterator protocol to your objects because so many programs expect objects to support it? Or do programs use the iterator protocol because so many programs support it? The answer might not be clear, but the implications are. If you have a collection of data, or something that can be interpreted as a collection, then it’s worth adding the appropriate methods to your class. And if you’re not creating a new class, you can still take advantage of iterables with generator functions and expressions.
+
+The book covers how to:
+
+- Add the iterator protocol to a class you’ve written
+- Add the iterator protocol to a class via a helper iterator class
+- Write generator functions that filter, modify, and add to iterators that you would otherwise have created or used
+- Use generator expressions for greater efficiency than list comprehensions
 
 ### Iterator protocol
 
@@ -552,10 +569,23 @@ Advantages to this design:
 
 ### Stopping Generator Functions
 
-- In a generator function, `yield` indicates that you want to keep the generator going and return a value for 
-  the current iteration, while `return` indicates that you want to exit completely.
-- In generator functions, don't explicitly raise `StopIteration`. That happens automatically when the generator 
-  reaches the end of the function. 
-- If you want to exit from the function prematurely, use a `return` statement. 
-- Using a `return` with a value (e.g., return 5) from a generator function won't throw an error, but the value will be 
-  ignored. 
+- In a generator function, `yield` indicates that you want to keep the generator going and return a value for the
+  current iteration, while `return` indicates that you want to exit completely.
+- In generator functions, don't explicitly raise `StopIteration`. That happens automatically when the generator reaches
+  the end of the function.
+- If you want to exit from the function prematurely, use a `return` statement.
+- Using a `return` with a value (e.g., return 5) from a generator function won't throw an error, but the value will be
+  ignored.
+
+### `itertools`
+
+Python comes with the `itertools` module, which makes it easy to create many types of iterators.
+
+The `chain` tool allows you to chain together various types of iterables.
+
+```python
+from itertools import chain
+
+print([i for i in chain('abc', [1, 2, 3], {'a': 1, 'b': 2})])
+# ['a', 'b', 'c', 1, 2, 3, 'a', 'b']
+```
